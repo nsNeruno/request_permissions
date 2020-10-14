@@ -1,5 +1,6 @@
 package com.u12ampere.request_permission;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -8,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,10 +39,11 @@ public final class Utils {
     }
 
     @Nullable
+    @SuppressWarnings("unchecked")
     public static String[] listToArray(Object object) {
-        if (!(object instanceof List)) return null;
-        final String[] array = new String[((List) object).size()];
-        ((List) object).toArray(array);
+        if (!(object instanceof List<?>)) return null;
+        final String[] array = new String[((List<String>) object).size()];
+        ((List<String>) object).toArray(array);
         return array;
     }
 }

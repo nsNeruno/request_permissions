@@ -27,6 +27,8 @@ class _MyAppState extends State<MyApp> {
   String permission;
   List<String> permissions;
 
+  RequestPermission requestPermission;
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +40,9 @@ class _MyAppState extends State<MyApp> {
       "android.permission.CALL_PHONE",
     ];
 
-    RequestPermission.instace.results.listen((event) {
+    requestPermission = RequestPermission.instace;
+
+    requestPermission.results.listen((event) {
       setState(() {
         results = """
         permissions: ${event.permissions}
@@ -46,10 +50,18 @@ class _MyAppState extends State<MyApp> {
         grantResults: ${event.grantResults}
         """;
       });
-      print("\n$results\n-----------------------------------\n");
+      print("""
+      
+      $results
+            
+      grantedPermissions: ${event.grantedPermissions}
+
+      -----------------------------------
+      
+      """);
     });
 
-    RequestPermission.instace.setLogLevel(LogLevel.error);
+    requestPermission.setLogLevel(LogLevel.none);
   }
 
   @override
@@ -59,30 +71,45 @@ class _MyAppState extends State<MyApp> {
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               RaisedButton(
                 child: Text("request single"),
                 onPressed: () {
-                  RequestPermission.instace
-                      .requestAndroidPermission(100, permission);
+                  requestPermission.requestAndroidPermission(100, permission);
                 },
               ),
               RaisedButton(
                 child: Text("request multiple"),
-                onPressed: () async {
-                  await RequestPermission.instace
-                      .requestMultipleAndroidPermissions(101, permissions);
+                onPressed: () {
+                  requestPermission.requestMultipleAndroidPermissions(
+                    101,
+                    permissions,
+                  );
                 },
               ),
               RaisedButton(
                 child: Text("has"),
                 onPressed: () async {
-                  bool has = await RequestPermission.instace
-                      .hasAndroidPermission(permission);
-                  print("has: $has");
+                  bool has =
+                      await requestPermission.hasAndroidPermission(permission);
+                  print("""
+                  permission: $permission
+                  hasPermission: $has
+                  """);
                 },
               ),
-              Text("Results: $results"),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.amber[200],
+                ),
+                padding: EdgeInsets.all(6),
+                child: Text(
+                  results,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
             ],
           ),
         ),

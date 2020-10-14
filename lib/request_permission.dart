@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class RequestPermission {
@@ -20,9 +18,10 @@ class RequestPermission {
 
   static RequestPermission get instace => _instance ??= RequestPermission._();
 
-  /// After using [requestAndroidPermission], you can listen to this stream,
-  /// to detect when the user makes his choice, wether he wants to grant
-  /// your app the [RequestablePermission] or not.
+  /// After using [requestAndroidPermission] or [requestMultipleAndroidPermissions],
+  /// you can listen to this stream, to detect when the user
+  /// makes his choice, wether he wants to grant
+  /// your app the requested permisson/s or not.
   Stream<ResultingPermission> get results =>
       _eventChannel.receiveBroadcastStream().map((event) {
         final data = jsonDecode(event);
@@ -37,31 +36,49 @@ class RequestPermission {
         );
       }).asBroadcastStream();
 
-  /// Use this function to request a [RequestablePermission],
-  /// if your app `already has the permission` and [checkIfAlreadyHas] is `true`
-  /// then nothing happens and `true` gets returned, else `false`.
+  /// This function uses [requestMultipleAndroidPermissions] to request
+  /// a single [permission].
   ///
-  /// if [checkIfAlreadyHas] is `false` then the app tries to request
-  /// the permission, even if it already has it.
-  ///
-  /// If `false` got returned you can use [results] to listen
-  /// for the event, when the user makes his final choice.
+  /// `See` [requestMultipleAndroidPermissions] `for more info.`
   Future<bool> requestAndroidPermission(
     int requestCode,
-    String permission, [
-    bool checkIfAlreadyHas = true,
-  ]) async {
-    assert(requestCode != null);
-    assert(permission != null);
-    return await _channel
-        .invokeMethod("requestAndroidPermission", <String, Object>{
-      "permission": permission,
-      "requestCode": requestCode,
-      "checkIfAlreadyHas": checkIfAlreadyHas,
-    });
+    String permission,
+  ) async {
+    return (await requestMultipleAndroidPermissions(requestCode, [permission]))
+        .values
+        .first;
   }
 
-  // TODO: Docs
+  /// ## Description
+  ///
+  /// * Use this function to request a list of [permissions].
+  ///
+  ///
+  /// * If your app `already has a certain permission`, then access
+  ///   for it will not be asked again.
+  ///
+  ///
+  /// * [Native implementation](https://developer.android.com/reference/androidx/core/app/ActivityCompat#requestPermissions(android.app.Activity,%20java.lang.String[],%20int)).
+  ///
+  ///
+  /// ## Paramters
+  ///
+  /// * [permissions]: A list of strings, which are permissions,
+  ///   that you want to get granted by the user.
+  ///   [See all possible permissions](https://developer.android.com/reference/android/Manifest.permission).
+  ///
+  ///
+  /// * [requestCode]: The requestCode for your action. The
+  ///   [requestCode], from [ResultingPermission], you get, when listening to [results],
+  ///   is the one you set here.
+  ///
+  ///
+  /// ## Returns
+  ///
+  /// * This function returns a [Map], that contains each permission you requested
+  ///   as a key and wheter your app already has the permission or not.
+  ///   If your app already has the permission, then that qualifies as `true` and
+  ///   the user will not get asked for it again.
   Future<Map<String, bool>> requestMultipleAndroidPermissions(
     int requestCode,
     List<String> permissions,
@@ -69,8 +86,7 @@ class RequestPermission {
     assert(requestCode != null);
     assert(permissions != null);
     return Map.from(
-      await _channel
-          .invokeMethod("requestMultipleAndroidPermissions", <String, Object>{
+      await _channel.invokeMethod("requestPermissions", <String, Object>{
         "permissions": permissions,
         "requestCode": requestCode,
       }),
@@ -79,7 +95,7 @@ class RequestPermission {
 
   /// Check wether your app has a certain [permission].
   Future<bool> hasAndroidPermission(String permission) async =>
-      await _channel.invokeMethod("hasAndroidPermission", <String, Object>{
+      await _channel.invokeMethod("hasPermission", <String, Object>{
         "permission": permission,
       });
 
@@ -98,6 +114,33 @@ class ResultingPermission {
     this.permissions,
     this.grantResults,
   });
+
+  /// A map that contains each permission from [permissions],
+  /// and wheter it has been granted or not.
+  ///
+  /// The permission being granted corresponds to `true`.
+  Map<String, bool> get grantedPermissions {
+    Map<String, bool> map = {};
+    for (var i = 0; i < permissions.length; i++) {
+      if (i < grantResults.length) {
+        map[permissions[i]] = grantResults[i] == 0;
+      } else {
+        // If there are more permissions than grantResults
+        // then assume that they are not granted
+        map[permissions[i]] = false;
+      }
+    }
+    return map;
+  }
+
+  /// Check wheter a certain requested [permission] has
+  /// been granted.
+  ///
+  /// The permission beiing granted corresponds to `true`.
+  bool isGranted(String permission) {
+    assert(permissions.contains(permission));
+    return grantedPermissions[permission];
+  }
 }
 
 enum LogLevel {
