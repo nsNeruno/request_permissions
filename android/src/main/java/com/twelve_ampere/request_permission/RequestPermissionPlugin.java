@@ -1,4 +1,4 @@
-package com.u12ampere.request_permission;
+package com.twelve_ampere.request_permission;
 
 import android.app.Activity;
 
@@ -28,7 +28,7 @@ public class RequestPermissionPlugin implements
 
     public static final String LOG_TAG = RequestPermissionPlugin.class.getSimpleName();
 
-    private static final String NAMESPACE = "com.u12ampere.request_permission.RequestPermissionPlugin";
+    private static final String NAMESPACE = "com.twelve_ampere.request_permission.RequestPermissionPlugin";
     private static final String METHODCHANNEL_ID = NAMESPACE + ".methods";
     private static final String EVENTCHANNEL_ID = NAMESPACE + ".events";
 

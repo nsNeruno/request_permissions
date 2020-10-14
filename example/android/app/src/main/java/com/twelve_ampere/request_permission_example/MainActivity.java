@@ -1,4 +1,4 @@
-package com.u12ampere.request_permission_example;
+package com.twelve_ampere.request_permission_example;
 
 import io.flutter.embedding.android.FlutterActivity;
 

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 class RequestPermission {
   static const String _namespace =
-      "com.u12ampere.request_permission.RequestPermissionPlugin";
+      "com.twelve_ampere.request_permission.RequestPermissionPlugin";
   static const String _methodChannelId = _namespace + ".methods";
   static const String _eventChannelId = _namespace + ".events";
 

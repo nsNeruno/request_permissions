@@ -1,4 +1,4 @@
-package com.u12ampere.request_permission;
+package com.twelve_ampere.request_permission;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

@@ -20,5 +20,5 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.u12ampere.request_permission
+        package: com.twelve_ampere.request_permission
         pluginClass: RequestPermissionPlugin

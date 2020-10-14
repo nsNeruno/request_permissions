@@ -1,4 +1,4 @@
-group 'com.u12ampere.request_permission'
+group 'com.twelve_ampere.request_permission'
 version '1.0'
 
 buildscript {
