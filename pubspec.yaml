@@ -1,7 +1,6 @@
 name: request_permission
 description: A flutter plugin for requesting android permissions.
 version: 1.0.0
-author: Emanuel Oberholzer
 homepage: https://gitlab.com/flutterplugins/request_permission
 
 environment:
