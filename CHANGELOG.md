@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Fixed typo in README
+
 ## 1.1.0
 
 - Implemented the functionality to request the android permission [SYSTEM_ALERT_WINDOW](https://developer.android.com/reference/android/Manifest.permission#SYSTEM_ALERT_WINDOW)
