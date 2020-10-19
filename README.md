@@ -10,7 +10,7 @@ at last.
 #### Android
 
 Add the permissions your app needs to the **android/app/src/main/AndroidManifest.xml**.
-Put the permissions in the **<manifest>** tag **not** into the **<application>** tag.
+Put the permissions in the **manifest** tag **not** into the **application** tag.
 
 ```dart
     <uses-permission android:name="android.permission.CAMERA" />
