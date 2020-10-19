@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:request_permission/request_permission.dart';
+import 'package:request_permission/request_permissions.dart';
+
+import 'other_widget.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
   //Tries to only allow Portrait mode, if an Error occures
   //it launches anyway but with Portrait and landscape
   SystemChrome.setPreferredOrientations([
@@ -25,7 +26,7 @@ class _MyAppState extends State<MyApp> {
   String results;
 
   String permission;
-  List<String> permissions;
+  Set<String> permissions;
 
   RequestPermission requestPermission;
 
@@ -35,10 +36,11 @@ class _MyAppState extends State<MyApp> {
     results = "Empty";
 
     permission = "android.permission.CAMERA";
-    permissions = [
+    permissions = {
       permission,
       "android.permission.CALL_PHONE",
-    ];
+      "android.permission.SYSTEM_ALERT_WINDOW"
+    };
 
     requestPermission = RequestPermission.instace;
 
@@ -48,17 +50,10 @@ class _MyAppState extends State<MyApp> {
         permissions: ${event.permissions}
         requestCode: ${event.requestCode}
         grantResults: ${event.grantResults}
+        
+        grantedPermissions: ${event.grantedPermissions}
         """;
       });
-      print("""
-      
-      $results
-            
-      grantedPermissions: ${event.grantedPermissions}
-
-      -----------------------------------
-      
-      """);
     });
 
     requestPermission.setLogLevel(LogLevel.none);
@@ -76,15 +71,24 @@ class _MyAppState extends State<MyApp> {
               RaisedButton(
                 child: Text("request single"),
                 onPressed: () {
-                  requestPermission.requestAndroidPermission(100, permission);
+                  requestPermission.requestAndroidPermission(permission, 100);
+                },
+              ),
+              RaisedButton(
+                child: Text("request window"),
+                onPressed: () {
+                  requestPermission.requestAndroidPermission(
+                    "android.permission.SYSTEM_ALERT_WINDOW",
+                    40,
+                  );
                 },
               ),
               RaisedButton(
                 child: Text("request multiple"),
                 onPressed: () {
                   requestPermission.requestMultipleAndroidPermissions(
-                    101,
                     permissions,
+                    101,
                   );
                 },
               ),
@@ -110,6 +114,7 @@ class _MyAppState extends State<MyApp> {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
+              OtherWidget(),
             ],
           ),
         ),

@@ -1,13 +1,14 @@
 package com.twelve_ampere.request_permission;
 
-import android.app.Activity;
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -36,21 +37,29 @@ public class RequestPermissionPlugin implements
     private EventChannel eventChannel;
     private EventChannel.EventSink eventSink;
 
-    private Activity activity;
-    private int logLevel;
     private final PluginRegistry.RequestPermissionsResultListener permissionsResultListener;
+    private final PluginRegistry.ActivityResultListener activityResultListener;
+
+    private ActivityPluginBinding activityBinding;
+    /**
+     * logLevel is initialized with 2, which stands for verbose
+     * {@link android.util.Log#VERBOSE}
+     */
+    private int logLevel;
 
     public RequestPermissionPlugin() {
-        // initialize logLevel with 0, which stands for verbose
-        logLevel = 0;
+        logLevel = 2;
+        Log.setLogLevel(logLevel);
         permissionsResultListener = new PluginRegistry.RequestPermissionsResultListener() {
             @Override
             public boolean onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-                if (isLogLevelVerbose()) {
-                    Log.i(LOG_TAG, "requestCode: " + requestCode
-                            + "\npermissions: " + Arrays.toString(permissions)
-                            + "\ngrantResults: " + Arrays.toString(grantResults));
-                }
+                Log.i(
+                        LOG_TAG,
+                        "RequestPermissionsResultListener"
+                                + "\nrequestCode: " + requestCode
+                                + "\npermissions: " + Arrays.toString(permissions)
+                                + "\ngrantResults: " + Arrays.toString(grantResults)
+                );
                 if (eventSink != null) {
                     // Event has to be sent in JSON format, because
                     // sending an array is not supported by the MethodChannel API
@@ -62,8 +71,43 @@ public class RequestPermissionPlugin implements
                                     + "}"
                     );
                 } else {
-                    if (isLogLevelError())
-                        Log.e(LOG_TAG, "onRequestPermissionsResult, eventSink is null");
+                    Log.e(LOG_TAG, "onRequestPermissionsResult, eventSink is null");
+                }
+                return true;
+            }
+        };
+        // Todo: Finish activityResultListener
+        activityResultListener = new PluginRegistry.ActivityResultListener() {
+            @Override
+            public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+//                resultCode is either
+//                Activity.RESULT_OK = -1 or
+//                Activity.RESULT_CANCELED = 0
+
+                Log.i(
+                        LOG_TAG,
+                        "\n\nActivityResultListener"
+                                + "\npermission: " + Manifest.permission.SYSTEM_ALERT_WINDOW
+                                + "\nrequestCode: " + requestCode
+                                + "\nresultCode: " + resultCode
+                );
+
+                if (eventSink != null) {
+//                  Sending this as JSON format as well
+//                  for compatibility reasons with the API
+//                  on the Dart side.
+                    eventSink.success(
+                            "{\"requestCode\":" + requestCode
+                                    + ", \"permissions\":" + Utils.toJSONArray(new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW})
+                                    + ", \"grantResults\":" + Utils.toJSONArray(new Integer[]{
+                                    (Utils.hasPermissionSystemAlertWindow(activityBinding.getActivity())
+                                            ? PackageManager.PERMISSION_GRANTED
+                                            : PackageManager.PERMISSION_DENIED)
+                            })
+                                    + "}"
+                    );
+                } else {
+                    Log.e(LOG_TAG, "onRequestPermissionsResult, eventSink is null");
                 }
                 return true;
             }
@@ -86,23 +130,30 @@ public class RequestPermissionPlugin implements
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-        activity = binding.getActivity();
-        binding.addRequestPermissionsResultListener(permissionsResultListener);
+        activityBinding = binding;
+        activityBinding.addRequestPermissionsResultListener(permissionsResultListener);
+        activityBinding.addActivityResultListener(activityResultListener);
     }
 
     @Override
     public void onDetachedFromActivityForConfigChanges() {
-        activity = null;
+        activityBinding.removeRequestPermissionsResultListener(permissionsResultListener);
+        activityBinding.removeActivityResultListener(activityResultListener);
+        activityBinding = null;
     }
 
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
-        activity = binding.getActivity();
+        activityBinding = binding;
+        activityBinding.addRequestPermissionsResultListener(permissionsResultListener);
+        activityBinding.addActivityResultListener(activityResultListener);
     }
 
     @Override
     public void onDetachedFromActivity() {
-        activity = null;
+        activityBinding.removeRequestPermissionsResultListener(permissionsResultListener);
+        activityBinding.removeActivityResultListener(activityResultListener);
+        activityBinding = null;
     }
 
     @Override
@@ -112,66 +163,88 @@ public class RequestPermissionPlugin implements
 
                 final String[] permissions = Utils.listToArray(call.argument("permissions"));
                 final int requestCode = call.argument("requestCode");
-                final HashMap<String, Boolean> map = new HashMap<>();
 
-                if (activity == null) {
-                    if (isLogLevelError()) {
-                        Log.e(LOG_TAG, "requestMultipleAndroidPermissions, activity is null");
-                    }
-                    result.error(null, "requestMultipleAndroidPermissions, activity is null", null);
+                if (activityBinding == null) {
+                    Log.e(LOG_TAG, "requestMultipleAndroidPermissions, activityBinding is null");
+                    result.error(null, "requestMultipleAndroidPermissions, activityBinding is null", null);
                 } else if (permissions == null) {
-                    if (isLogLevelError()) {
-                        Log.e(LOG_TAG, "requestMultipleAndroidPermissions, permissions is null");
-                    }
+                    Log.e(LOG_TAG, "requestMultipleAndroidPermissions, permissions is null");
                     result.error(null, "requestMultipleAndroidPermissions, permissions is null", null);
                 } else {
-                    if (permissions.length == 1) {
-                        if (!Utils.hasPermission(activity, permissions[0])) {
-                            ActivityCompat.requestPermissions(activity, permissions, requestCode);
-                            map.put(permissions[0], false);
-                        } else {
-                            map.put(permissions[0], true);
-                        }
-                    } else {
-                        final ArrayList<String> ungrantedPermissions = new ArrayList<>();
-                        for (int i = 0; i < permissions.length; i++) {
-                            final boolean has = Utils.hasPermission(activity, permissions[i]);
-                            map.put(permissions[i], has);
-                            if (!has) ungrantedPermissions.add(permissions[i]);
-                        }
-                        if (!ungrantedPermissions.isEmpty()) {
-                            ActivityCompat.requestPermissions(
-                                    activity,
-                                    Utils.listToArray(ungrantedPermissions),
-                                    requestCode
-                            );
-                        }
+
+                    // handle all other not yet granted permissions
+                    if (permissions.length > 0) {
+                        ActivityCompat.requestPermissions(
+                                activityBinding.getActivity(),
+                                permissions,
+                                requestCode
+                        );
                     }
-                    result.success(map);
+
+                    result.success(null);
+                }
+
+                break;
+
+            case "requestPermissionSystemAlertWindow":
+                final int requestCode2 = call.argument("requestCode");
+
+                Log.i(LOG_TAG, "requestPermissionSystemAlertWindow, requestCode: " + requestCode2);
+
+                if (activityBinding == null) {
+                    Log.e(LOG_TAG, "requestPermissionSystemAlertWindow, activityBinding is null");
+                    result.error(null, "requestPermissionSystemAlertWindow, activityBinding is null", null);
+                } else {
+                    Utils.requestPermissionSystemAlertWindow(
+                            activityBinding.getActivity(),
+                            requestCode2
+                    );
+                    result.success(null);
                 }
 
                 break;
 
             case "hasPermission":
-                final String hasPermission = call.argument("permission");
+                final String permissionArg = call.argument("permission");
 
-                if (activity == null) {
-                    result.error(null, "onMethodCall, activity is null", null);
-                    if (isLogLevelError()) Log.e(LOG_TAG, "onMethodCall, activity is null");
+                if (activityBinding == null) {
+                    Log.e(LOG_TAG, "hasPermission, activityBinding is null");
+                    result.error(null, "hasPermission, activityBinding is null", null);
+                } else if (permissionArg == null) {
+                    Log.e(LOG_TAG, "hasPermission, permissionArg is null");
+                    result.error(null, "hasPermission, permissionArg is null", null);
                 } else {
-                    result.success(Utils.hasPermission(activity, hasPermission));
+                    final boolean hasPermission;
+
+                    if (permissionArg.equals(Manifest.permission.SYSTEM_ALERT_WINDOW)) {
+                        hasPermission = Utils.hasPermissionSystemAlertWindow(
+                                activityBinding.getActivity()
+                        );
+                    } else {
+                        hasPermission = Utils.hasPermission(
+                                activityBinding.getActivity(),
+                                permissionArg
+                        );
+                    }
+
+                    Log.i(LOG_TAG, "hasPermission"
+                            + "\npermission: " + permissionArg
+                            + "\nhasPermission: " + hasPermission);
+
+                    result.success(hasPermission);
                 }
                 break;
 
             case "setLogLevel":
                 logLevel = call.argument("logLevel");
-                if (isLogLevelVerbose()) Log.i(LOG_TAG, "logLevel is now <" + logLevel + ">");
+                Log.setLogLevel(logLevel);
+                Log.i(LOG_TAG, "logLevel is now <" + logLevel + ">");
+                result.success(null);
                 break;
 
             default:
                 result.notImplemented();
         }
-
     }
 
     @Override
@@ -184,14 +257,5 @@ public class RequestPermissionPlugin implements
         eventSink = null;
     }
 
-    //**************************** Private Functions ****************************//
-
-    private boolean isLogLevelVerbose() {
-        return logLevel == 0;
-    }
-
-    private boolean isLogLevelError() {
-        return logLevel == 1 || isLogLevelVerbose();
-    }
 }
 

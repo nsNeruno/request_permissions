@@ -1,3 +1,7 @@
+## 1.1.0
+
+- Implemented the functionality to request the android permission [SYSTEM_ALERT_WINDOW](https://developer.android.com/reference/android/Manifest.permission#SYSTEM_ALERT_WINDOW)
+
 ## 1.0.1
 
 - Changed package name in **request_permission\android\src\main\AndroidManifest.xml**

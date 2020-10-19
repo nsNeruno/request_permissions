@@ -2,6 +2,9 @@
 
 Use his plugin to request permissions for the android part of your [Flutter](http://www.flutter.dev).
 
+The android permission ["android.permission.SYSTEM_ALERT_WINDOW"](https://developer.android.com/reference/android/Manifest.permission#SYSTEM_ALERT_WINDOW) always gets requested
+at last.
+
 ## Setup
 
 #### Android
@@ -12,6 +15,7 @@ Put the permissions in the **<manifest>** tag **not** into the **<application>**
 ```dart
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
  <application
 ```
 
@@ -37,10 +41,11 @@ RaisedButton(
     child: Text("request permissions"),
     onPressed: () {
         // 101 is the requestCode
-        requestPermission.requestMultipleAndroidPermissions(101, [
+        requestPermission.requestMultipleAndroidPermissions({
             "android.permission.CAMERA",
-            "android.permission.CALL_PHONE" 
-        ]);
+            "android.permission.CALL_PHONE",
+            "android.permission.SYSTEM_ALERT_WINDOW"
+        }, 101);
     },
 ),
 ```
@@ -51,15 +56,15 @@ Or request just one permission:
 RaisedButton(
     child: Text("request camera permission"),
     onPressed: () {
-        // 101 is the requestCode
-        requestPermission.requestAndroidPermission(27, "android.permission.CAMERA");
+        // 27 is the requestCode
+        requestPermission.requestAndroidPermission("android.permission.CAMERA", 27);
     },
 ),
 RaisedButton(
     child: Text("request call_phone permission"),
     onPressed: () {
-        // 101 is the requestCode
-        requestPermission.requestAndroidPermission(28, "android.permission.CALL_PHONE");
+        // 28 is the requestCode
+        requestPermission.requestAndroidPermission("android.permission.CALL_PHONE", 28);
     },
 ),
 ```
