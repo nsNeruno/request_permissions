@@ -1,4 +1,4 @@
-library request_permissions;
+library request_permission;
 
 export 'src/request_permission.dart';
 

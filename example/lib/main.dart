@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:request_permission/request_permissions.dart';
+import 'package:request_permission/request_permission.dart';
 
 import 'other_widget.dart';
 
