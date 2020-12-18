@@ -50,6 +50,7 @@ class RequestPermission {
         _requestPermissionSystemAlertWindow(_requestCode);
         _hasPermissionSystemAlertWindow = false;
       }
+      _requestedPermissions.removeAll(event.grantedPermissions.keys);
     });
   }
 

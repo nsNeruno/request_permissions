@@ -1,3 +1,7 @@
+## 1.1.2
+
+- Fixed a bug where [RequestPermission.instance.isWaitingForResponse] stayed true forever
+
 ## 1.1.1
 
 - Fixed typo in README
