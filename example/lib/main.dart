@@ -68,13 +68,13 @@ class _MyAppState extends State<MyApp> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              RaisedButton(
+              ElevatedButton(
                 child: Text("request single"),
                 onPressed: () {
                   requestPermission.requestAndroidPermission(permission, 100);
                 },
               ),
-              RaisedButton(
+              ElevatedButton(
                 child: Text("request window"),
                 onPressed: () {
                   requestPermission.requestAndroidPermission(
@@ -83,7 +83,7 @@ class _MyAppState extends State<MyApp> {
                   );
                 },
               ),
-              RaisedButton(
+              ElevatedButton(
                 child: Text("request multiple"),
                 onPressed: () {
                   requestPermission.requestMultipleAndroidPermissions(
@@ -92,7 +92,7 @@ class _MyAppState extends State<MyApp> {
                   );
                 },
               ),
-              RaisedButton(
+              ElevatedButton(
                 child: Text("has"),
                 onPressed: () async {
                   bool has =

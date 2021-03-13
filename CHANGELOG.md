@@ -1,3 +1,7 @@
+## 2.0.0
+
+- Migrated to null safety.
+
 ## 1.1.2
 
 - Fixed a bug where [RequestPermission.instance.isWaitingForResponse] stayed true forever

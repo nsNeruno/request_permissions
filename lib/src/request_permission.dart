@@ -14,13 +14,18 @@ class RequestPermission {
   static const MethodChannel _channel = MethodChannel(_methodChannelId);
   static const EventChannel _eventChannel = EventChannel(_eventChannelId);
 
-  static RequestPermission _instance;
+  static RequestPermission? _instance;
 
-  bool _hasPermissionSystemAlertWindow;
+  static RequestPermission get instace => _instance ??= RequestPermission._();
 
-  int _requestCode;
+  /// If you decide to omit the [requestCode], when calling
+  /// [requestAndroidPermission] or [requestMultipleAndroidPermissions],
+  /// then this one gets used.
+  static const int defaultRequestCode = 1049;
 
-  Set<String> _requestedPermissions;
+  late bool _hasPermissionSystemAlertWindow;
+  late int _requestCode;
+  late Set<String> _requestedPermissions;
 
   /// [_results] has to be saved as a variable, because if
   /// `asBroadcastStream()` gets called multiple
@@ -28,7 +33,7 @@ class RequestPermission {
   /// added listener working.
   ///
   /// [Additional Info](https://stackoverflow.com/questions/16491069/why-does-this-dart-broadcast-stream-not-accept-multiple-listen-calls)
-  Stream<ResultingPermission> _results;
+  late Stream<ResultingPermission> _results;
 
   RequestPermission._() {
     _hasPermissionSystemAlertWindow = false;
@@ -53,13 +58,6 @@ class RequestPermission {
       _requestedPermissions.removeAll(event.grantedPermissions.keys);
     });
   }
-
-  /// If you decide to omit the [requestCode], when calling
-  /// [requestAndroidPermission] or [requestMultipleAndroidPermissions],
-  /// then this one gets used.
-  static const int defaultRequestCode = 1049;
-
-  static RequestPermission get instace => _instance ??= RequestPermission._();
 
   /// Wether this app is currently waiting for a response from the user
   /// (`true`), or not (`false`).
@@ -115,9 +113,6 @@ class RequestPermission {
     Set<String> permissions, [
     int requestCode = defaultRequestCode,
   ]) async {
-    assert(requestCode != null);
-    assert(permissions != null);
-
     if (isWaitingForResponse) {
       print("""
 *********************************************************
@@ -201,9 +196,9 @@ class ResultingPermission {
   final List<int> grantResults;
 
   const ResultingPermission._({
-    this.requestCode,
-    this.permissions,
-    this.grantResults,
+    required this.requestCode,
+    required this.permissions,
+    required this.grantResults,
   });
 
   /// A map that contains each permission from [permissions],
@@ -228,10 +223,7 @@ class ResultingPermission {
   /// been granted.
   ///
   /// The permission beiing granted corresponds to `true`.
-  bool isGranted(String permission) {
-    assert(permissions.contains(permission));
-    return grantedPermissions[permission];
-  }
+  bool isGranted(String permission) => grantedPermissions[permission] ?? false;
 }
 
 enum LogLevel {
