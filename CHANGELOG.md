@@ -1,3 +1,8 @@
+## 2.1.0
+
+- Added constants from the offical [android docs](https://developer.android.com/reference/android/Manifest.permission) for each permission.
+- Added `hasAndroidPermissions` method, for requesting the status of multiple permissions at once.
+
 ## 2.0.0
 
 - Migrated to null safety.

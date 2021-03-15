@@ -8,14 +8,15 @@ import 'android_permissions.dart';
 class RequestPermission {
   static const String _namespace =
       "com.twelve_ampere.request_permission.RequestPermissionPlugin";
-  static const String _methodChannelId = _namespace + ".methods";
-  static const String _eventChannelId = _namespace + ".events";
+  static const String _methodChannelId = "$_namespace.methods";
+  static const String _eventChannelId = "$_namespace.events";
 
   static const MethodChannel _channel = MethodChannel(_methodChannelId);
   static const EventChannel _eventChannel = EventChannel(_eventChannelId);
 
   static RequestPermission? _instance;
 
+  // ignore: prefer_constructors_over_static_methods
   static RequestPermission get instace => _instance ??= RequestPermission._();
 
   /// If you decide to omit the [requestCode], when calling
@@ -39,6 +40,7 @@ class RequestPermission {
     _hasPermissionSystemAlertWindow = false;
     _requestCode = defaultRequestCode;
     _requestedPermissions = {};
+
     _results = _eventChannel.receiveBroadcastStream().map((event) {
       final data = jsonDecode(event);
       return ResultingPermission._(
@@ -77,7 +79,7 @@ class RequestPermission {
     String permission, [
     int requestCode = defaultRequestCode,
   ]) async =>
-      await requestMultipleAndroidPermissions({permission}, requestCode);
+      requestMultipleAndroidPermissions({permission}, requestCode);
 
   /// ## Description
   ///
@@ -135,10 +137,10 @@ previously requested: $_requestedPermissions
 
       _requestedPermissions = ungrantedPermissionsAsList.toSet();
 
-      /// The permission [AndroidPermissions.system_alert_window] has
+      /// The permission [AndroidPermissions.systemAlertWindow] has
       /// to be handled seperately.
       _hasPermissionSystemAlertWindow = ungrantedPermissionsAsList
-          .remove(AndroidPermissions.system_alert_window);
+          .remove(AndroidPermissions.systemAlertWindow);
 
       if (ungrantedPermissionsAsList.isNotEmpty) {
         await _channel.invokeMethod("requestPermissions", <String, Object>{
@@ -159,7 +161,7 @@ previously requested: $_requestedPermissions
   /// or if it has to be requested (`false`);
   Future<void> _requestPermissionSystemAlertWindow(
           [int requestCode = defaultRequestCode]) async =>
-      await _channel.invokeMethod("requestPermissionSystemAlertWindow", {
+      _channel.invokeMethod("requestPermissionSystemAlertWindow", {
         "requestCode": requestCode,
       });
 
@@ -169,9 +171,25 @@ previously requested: $_requestedPermissions
         "permission": permission,
       });
 
+  /// Calls [hasAndroidPermission] on every permission in [permissions].
+  Future<Map<String, bool>> hasAndroidPermissions(
+      Set<String> permissions) async {
+    final results = Map<String, bool>.fromIterable(
+      permissions,
+      key: (element) => element,
+      value: (element) => false,
+    );
+
+    for (final permission in permissions)
+      results[permission] = await hasAndroidPermission(permission);
+
+    return results;
+  }
+
   /// The logLevel defaults to [LogLevel.verbose].
   Future<void> setLogLevel(LogLevel logLevel) async {
     int levelCode = 8;
+
     switch (logLevel) {
       case LogLevel.verbose:
         levelCode = 2;
@@ -185,7 +203,8 @@ previously requested: $_requestedPermissions
       default:
         levelCode = 8;
     }
-    return await _channel
+
+    await _channel
         .invokeMethod("setLogLevel", <String, int>{"logLevel": levelCode});
   }
 }
@@ -206,7 +225,7 @@ class ResultingPermission {
   ///
   /// The permission being granted corresponds to `true`.
   Map<String, bool> get grantedPermissions {
-    Map<String, bool> map = {};
+    final Map<String, bool> map = {};
     for (var i = 0; i < permissions.length; i++) {
       if (i < grantResults.length) {
         map[permissions.elementAt(i)] = grantResults[i] == 0;

@@ -13,7 +13,7 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).whenComplete(() {
-    runApp(new MyApp());
+    runApp(MyApp());
   });
 }
 
@@ -69,13 +69,13 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                child: Text("request single"),
+                child: const Text("request single"),
                 onPressed: () {
                   requestPermission.requestAndroidPermission(permission, 100);
                 },
               ),
               ElevatedButton(
-                child: Text("request window"),
+                child: const Text("request window"),
                 onPressed: () {
                   requestPermission.requestAndroidPermission(
                     "android.permission.SYSTEM_ALERT_WINDOW",
@@ -84,7 +84,7 @@ class _MyAppState extends State<MyApp> {
                 },
               ),
               ElevatedButton(
-                child: Text("request multiple"),
+                child: const Text("request multiple"),
                 onPressed: () {
                   requestPermission.requestMultipleAndroidPermissions(
                     permissions,
@@ -93,9 +93,9 @@ class _MyAppState extends State<MyApp> {
                 },
               ),
               ElevatedButton(
-                child: Text("has"),
+                child: const Text("has"),
                 onPressed: () async {
-                  bool has =
+                  final bool has =
                       await requestPermission.hasAndroidPermission(permission);
                   print("""
                   permission: $permission
@@ -108,10 +108,10 @@ class _MyAppState extends State<MyApp> {
                   borderRadius: BorderRadius.circular(8),
                   color: Colors.amber[200],
                 ),
-                padding: EdgeInsets.all(6),
+                padding: const EdgeInsets.all(6),
                 child: Text(
                   results,
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
               OtherWidget(),
