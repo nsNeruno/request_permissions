@@ -1,3 +1,5 @@
+part of request_permission;
+
 /// This class lists all permissions from android.
 ///
 /// [Source](https://developer.android.com/reference/android/Manifest.permission)
@@ -73,6 +75,8 @@ abstract class AndroidPermissions {
       "android.permission.BIND_CALL_REDIRECTION_SERVICE";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#BIND_CARRIER_MESSAGING_CLIENT_SERVICE)
+  @Deprecated(
+      "\n\nThis constant was deprecated in API level 23. Use bindCarrierServices instead")
   static const String bindCarrierMessagingClientService =
       "android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE";
 
@@ -85,6 +89,8 @@ abstract class AndroidPermissions {
       "android.permission.BIND_CARRIER_SERVICES";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#BIND_CHOOSER_TARGET_SERVICE)
+  @Deprecated(
+      "\n\nThis constant was deprecated in API level 30. For publishing direct share targets, please follow the instructions in https://developer.android.com/training/sharing/receive.html#providing-direct-share-targets instead")
   static const String bindChooserTargetService =
       "android.permission.BIND_CHOOSER_TARGET_SERVICE";
 

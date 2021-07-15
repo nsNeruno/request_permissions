@@ -11,11 +11,12 @@ linter:
     hash_and_equals: true
     iterable_contains_unrelated_type: true
     list_remove_unrelated_type: true
-    literal_only_boolean_expressions: true
+    literal_only_boolean_expressions: false
     no_adjacent_strings_in_list: true
     no_duplicate_case_values: true
     no_logic_in_create_state: true
     prefer_relative_imports: true
+    prefer_single_quotes: false
     prefer_void_to_null: true
     test_types_in_equals: true
     throw_in_finally: true
@@ -58,11 +59,12 @@ linter:
     library_prefixes: true
     non_constant_identifier_names: true
     null_closures: true
+    omit_local_variable_types: false
     one_member_abstracts: true
     # Probably only useful for packages
     # package_api_docs: true
     package_prefixed_library_names: true
-    parameter_assignments: true
+    parameter_assignments: false
     prefer_asserts_in_initializer_lists: true
     prefer_collection_literals: true
     prefer_conditional_assignment: true
@@ -123,7 +125,7 @@ linter:
     void_checks: true
     # Pub rules
     sort_pub_dependencies: true
-    package_names: true
+    package_names: false
 
 analyzer:
   # strong-mode:
@@ -146,7 +148,6 @@ analyzer:
     hash_and_equals: warning
     iterable_contains_unrelated_type: warning
     list_remove_unrelated_type: warning
-    literal_only_boolean_expressions: info
     no_adjacent_strings_in_list: warning
     no_duplicate_case_values: error
     no_logic_in_create_state: info
@@ -256,4 +257,3 @@ analyzer:
 
     # Custom Pub rules
     sort_pub_dependencies: info
-    package_names: warning

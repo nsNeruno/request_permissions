@@ -1,4 +1,10 @@
 library request_permission;
 
-export 'src/android_permissions.dart';
-export 'src/request_permission.dart';
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
+
+part 'src/android_permissions.dart';
+part 'src/request_permission.dart';
+part 'src/resulting_permission.dart';

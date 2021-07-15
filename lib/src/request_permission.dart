@@ -1,9 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
-import 'android_permissions.dart';
+part of request_permission;
 
 class RequestPermission {
   static const String _namespace =
@@ -14,17 +9,20 @@ class RequestPermission {
   static const MethodChannel _channel = MethodChannel(_methodChannelId);
   static const EventChannel _eventChannel = EventChannel(_eventChannelId);
 
-  static RequestPermission? _instance;
-
-  // ignore: prefer_constructors_over_static_methods
-  static RequestPermission get instace => _instance ??= RequestPermission._();
+  static const int permissionGranted = 0;
+  static const int permissionDenied = -1;
 
   /// If you decide to omit the [requestCode], when calling
   /// [requestAndroidPermission] or [requestMultipleAndroidPermissions],
   /// then this one gets used.
   static const int defaultRequestCode = 1049;
 
-  late bool _hasPermissionSystemAlertWindow;
+  static RequestPermission? _instance;
+
+  // ignore: prefer_constructors_over_static_methods
+  static RequestPermission get instace => _instance ??= RequestPermission._();
+
+  late bool _shouldRequestPermissionSystemAlertWindow;
   late int _requestCode;
   late Set<String> _requestedPermissions;
 
@@ -37,7 +35,7 @@ class RequestPermission {
   late Stream<ResultingPermission> _results;
 
   RequestPermission._() {
-    _hasPermissionSystemAlertWindow = false;
+    _shouldRequestPermissionSystemAlertWindow = false;
     _requestCode = defaultRequestCode;
     _requestedPermissions = {};
 
@@ -53,10 +51,11 @@ class RequestPermission {
     }).asBroadcastStream();
 
     results.listen((event) {
-      if (_hasPermissionSystemAlertWindow) {
+      if (_shouldRequestPermissionSystemAlertWindow) {
+        _shouldRequestPermissionSystemAlertWindow = false;
         _requestPermissionSystemAlertWindow(_requestCode);
-        _hasPermissionSystemAlertWindow = false;
       }
+
       _requestedPermissions.removeAll(event.grantedPermissions.keys);
     });
   }
@@ -71,6 +70,41 @@ class RequestPermission {
   /// your app the requested permisson/s or not.
   Stream<ResultingPermission> get results => _results;
 
+  /// The permission [AndroidPermissions.system_alert_window] has to
+  /// be handled seperately.
+  ///
+  /// Returns wether your app has already been granted the permission (`true`),
+  /// or if it has to be requested (`false`);
+  Future<void> _requestPermissionSystemAlertWindow(
+          [int requestCode = defaultRequestCode]) =>
+      _channel.invokeMethod("requestPermissionSystemAlertWindow", {
+        "requestCode": requestCode,
+      });
+
+  /// The logLevel defaults to [LogLevel.verbose].
+  Future<void> setLogLevel(LogLevel logLevel) async {
+    int levelCode = 8;
+
+    switch (logLevel) {
+      case LogLevel.verbose:
+        levelCode = 2;
+        break;
+      case LogLevel.error:
+        levelCode = 6;
+        break;
+      case LogLevel.none:
+        levelCode = 8;
+        break;
+      default:
+        levelCode = 8;
+    }
+
+    await _channel.invokeMethod(
+      "setLogLevel",
+      <String, int>{"logLevel": levelCode},
+    );
+  }
+
   /// This function uses [requestMultipleAndroidPermissions] to request
   /// a single [permission].
   ///
@@ -78,7 +112,7 @@ class RequestPermission {
   Future<void> requestAndroidPermission(
     String permission, [
     int requestCode = defaultRequestCode,
-  ]) async =>
+  ]) =>
       requestMultipleAndroidPermissions({permission}, requestCode);
 
   /// ## Description
@@ -93,7 +127,7 @@ class RequestPermission {
   /// * [Native implementation](https://developer.android.com/reference/androidx/core/app/ActivityCompat#requestPermissions(android.app.Activity,%20java.lang.String[],%20int)).
   ///
   ///
-  /// ## Paramters
+  /// ## Parameters
   ///
   /// * [permissions]: A set of strings, which are permissions,
   ///   that you want to get granted by the user.
@@ -118,7 +152,7 @@ class RequestPermission {
     if (isWaitingForResponse) {
       print("""
 *********************************************************
-RequestPermission: Can not request another permission, while
+RequestPermission: Cannot request another permission, while
 still waiting for a response from the user for the previously
 requested permissions.
 
@@ -126,50 +160,48 @@ previously requested: $_requestedPermissions
 
 *********************************************************
     """);
-    } else {
-      final List<String> ungrantedPermissionsAsList = [];
+      return;
+    }
 
-      for (final item in permissions) {
-        if (!(await hasAndroidPermission(item))) {
-          ungrantedPermissionsAsList.add(item);
-        }
-      }
+    List<String> ungrantedPermissions = [];
 
-      _requestedPermissions = ungrantedPermissionsAsList.toSet();
+    for (final item in permissions) {
+      if (!(await hasAndroidPermission(item))) ungrantedPermissions.add(item);
+    }
 
-      /// The permission [AndroidPermissions.systemAlertWindow] has
-      /// to be handled seperately.
-      _hasPermissionSystemAlertWindow = ungrantedPermissionsAsList
-          .remove(AndroidPermissions.systemAlertWindow);
+    _requestedPermissions = ungrantedPermissions.toSet();
 
-      if (ungrantedPermissionsAsList.isNotEmpty) {
-        await _channel.invokeMethod("requestPermissions", <String, Object>{
-          "permissions": ungrantedPermissionsAsList,
-          "requestCode": requestCode,
-        });
-      } else if (_hasPermissionSystemAlertWindow) {
-        await _requestPermissionSystemAlertWindow(requestCode);
-        _hasPermissionSystemAlertWindow = false;
-      }
+    // Remove duplicates
+    ungrantedPermissions = _requestedPermissions.toList();
+
+    // The permission [AndroidPermissions.systemAlertWindow] has
+    // to be handled seperately.
+    _shouldRequestPermissionSystemAlertWindow =
+        ungrantedPermissions.remove(AndroidPermissions.systemAlertWindow);
+
+    if (ungrantedPermissions.isNotEmpty) {
+      await _channel.invokeMethod("requestPermissions", {
+        "permissions": ungrantedPermissions,
+        "requestCode": requestCode,
+      });
+      return;
+    }
+
+    // If [AndroidPermissions.systemAlertWindow] is the only
+    // requested permission, then instantly request it.
+    if (_shouldRequestPermissionSystemAlertWindow) {
+      _shouldRequestPermissionSystemAlertWindow = false;
+      await _requestPermissionSystemAlertWindow(requestCode);
     }
   }
 
-  /// The permission [AndroidPermissions.system_alert_window] has to
-  /// be handled seperately.
-  ///
-  /// Returns wether your app has already been granted the permission (`true`),
-  /// or if it has to be requested (`false`);
-  Future<void> _requestPermissionSystemAlertWindow(
-          [int requestCode = defaultRequestCode]) async =>
-      _channel.invokeMethod("requestPermissionSystemAlertWindow", {
-        "requestCode": requestCode,
-      });
-
   /// Check wether your app has a certain [permission].
   Future<bool> hasAndroidPermission(String permission) async =>
-      await _channel.invokeMethod("hasPermission", <String, Object>{
-        "permission": permission,
-      });
+      await _channel.invokeMethod<bool>(
+        "hasPermission",
+        {"permission": permission},
+      ) ??
+      false;
 
   /// Calls [hasAndroidPermission] on every permission in [permissions].
   Future<Map<String, bool>> hasAndroidPermissions(
@@ -186,63 +218,38 @@ previously requested: $_requestedPermissions
     return results;
   }
 
-  /// The logLevel defaults to [LogLevel.verbose].
-  Future<void> setLogLevel(LogLevel logLevel) async {
-    int levelCode = 8;
-
-    switch (logLevel) {
-      case LogLevel.verbose:
-        levelCode = 2;
-        break;
-      case LogLevel.error:
-        levelCode = 6;
-        break;
-      case LogLevel.none:
-        levelCode = 8;
-        break;
-      default:
-        levelCode = 8;
-    }
-
-    await _channel
-        .invokeMethod("setLogLevel", <String, int>{"logLevel": levelCode});
-  }
-}
-
-class ResultingPermission {
-  final int requestCode;
-  final Set<String> permissions;
-  final List<int> grantResults;
-
-  const ResultingPermission._({
-    required this.requestCode,
-    required this.permissions,
-    required this.grantResults,
-  });
-
-  /// A map that contains each permission from [permissions],
-  /// and wheter it has been granted or not.
+  /// ## Description
   ///
-  /// The permission being granted corresponds to `true`.
-  Map<String, bool> get grantedPermissions {
-    final Map<String, bool> map = {};
-    for (var i = 0; i < permissions.length; i++) {
-      if (i < grantResults.length) {
-        map[permissions.elementAt(i)] = grantResults[i] == 0;
-      } else {
-        // If there are more permissions than grantResults
-        // then assume that they are not granted
-        map[permissions.elementAt(i)] = false;
-      }
-    }
-    return map;
-  }
-
-  /// Check wheter a certain requested [permission] has
-  /// been granted.
+  /// * Gets whether you should show UI with rationale for requesting a permission.
+  ///   You should do this only if you do not have the permission and the context in
+  ///   which the permission is requested does not clearly communicate to the user
+  ///   what would be the benefit from granting this permission.
   ///
-  /// The permission beiing granted corresponds to `true`.
-  bool isGranted(String permission) => grantedPermissions[permission] ?? false;
+  ///
+  /// * For example, if you write a camera app, requesting the camera permission
+  ///   would be expected by the user and no rationale for why it is requested is
+  ///   needed. If however, the app needs location for tagging photos then a non-tech
+  ///   savvy user may wonder how location is related to taking photos. In this case
+  ///   you may choose to show UI with rationale of requesting this permission.
+  ///
+  ///
+  /// ## Parameters
+  ///
+  /// * [permission] - A permission your app wants to request.
+  ///
+  ///
+  /// ## Return
+  ///
+  /// * Whether you can show permission rationale UI.
+  ///
+  ///
+  /// [See](https://developer.android.com/reference/androidx/core/app/ActivityCompat#shouldShowRequestPermissionRationale(android.app.Activity,%20java.lang.String))
+  Future<bool> shouldShowRequestPermissionRationale(String permission) async =>
+      await _channel.invokeMethod<bool>(
+        "shouldShowRequestPermissionRationale",
+        {"permission": permission},
+      ) ??
+      false;
 }
 
 enum LogLevel {

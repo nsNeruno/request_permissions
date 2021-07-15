@@ -1,124 +1,205 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:request_permission/request_permission.dart';
-
-import 'other_widget.dart';
+import 'example_location_permissions.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
   //Tries to only allow Portrait mode, if an Error occures
   //it launches anyway but with Portrait and landscape
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).whenComplete(() {
-    runApp(MyApp());
+    runApp(const MyApp());
   });
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  String results;
-
-  String permission;
-  Set<String> permissions;
-
-  RequestPermission requestPermission;
-
-  @override
-  void initState() {
-    super.initState();
-    results = "Empty";
-
-    permission = "android.permission.CAMERA";
-    permissions = {
-      permission,
-      "android.permission.CALL_PHONE",
-      "android.permission.SYSTEM_ALERT_WINDOW"
-    };
-
-    requestPermission = RequestPermission.instace;
-
-    requestPermission.results.listen((event) {
-      setState(() {
-        results = """
-        permissions: ${event.permissions}
-        requestCode: ${event.requestCode}
-        grantResults: ${event.grantResults}
-        
-        grantedPermissions: ${event.grantedPermissions}
-        """;
-      });
-    });
-
-    requestPermission.setLogLevel(LogLevel.none);
-  }
+class MyApp extends StatelessWidget {
+  const MyApp();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                child: const Text("request single"),
-                onPressed: () {
-                  requestPermission.requestAndroidPermission(permission, 100);
-                },
-              ),
-              ElevatedButton(
-                child: const Text("request window"),
-                onPressed: () {
-                  requestPermission.requestAndroidPermission(
-                    "android.permission.SYSTEM_ALERT_WINDOW",
-                    40,
-                  );
-                },
-              ),
-              ElevatedButton(
-                child: const Text("request multiple"),
-                onPressed: () {
-                  requestPermission.requestMultipleAndroidPermissions(
-                    permissions,
-                    101,
-                  );
-                },
-              ),
-              ElevatedButton(
-                child: const Text("has"),
-                onPressed: () async {
-                  final bool has =
-                      await requestPermission.hasAndroidPermission(permission);
-                  print("""
-                  permission: $permission
-                  hasPermission: $has
-                  """);
-                },
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.amber[200],
-                ),
-                padding: const EdgeInsets.all(6),
-                child: Text(
-                  results,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-              OtherWidget(),
-            ],
-          ),
-        ),
-      ),
+      home: ExampleLocationPermissions(),
     );
   }
 }
+/*
+
+ permissions = {
+      // AndroidPermissions.acceptHandover,
+      //! AndroidPermissions.accessBackgroundLocation,
+      //! AndroidPermissions.accessCheckinProperties,
+      // AndroidPermissions.accessCoarseLocation,
+      // AndroidPermissions.accessFineLocation,
+      // AndroidPermissions.accessLocationExtraCommands,
+      // AndroidPermissions.accessMediaLocation,
+      // AndroidPermissions.accessNetworkState,
+      // AndroidPermissions.accessNotificationPolicy,
+      // AndroidPermissions.accessWifiState,
+      //! AndroidPermissions.accountManager,
+      // AndroidPermissions.activityRecognition,
+      //! AndroidPermissions.addVoicemail,
+      // AndroidPermissions.answerPhoneCalls,
+      //! AndroidPermissions.batteryStats,
+      //! AndroidPermissions.bindAccessibilityService,
+      //! AndroidPermissions.bindAppwidget,
+      //! AndroidPermissions.bindAutofillService,
+      //! AndroidPermissions.bindCallRedirectionService,
+      //! AndroidPermissions.bindCarrierMessagingClientService,
+      //! AndroidPermissions.bindCarrierMessagingService,
+      //! AndroidPermissions.bindCarrierServices,
+      //! AndroidPermissions.bindChooserTargetService,
+      //! AndroidPermissions.bindCompanionDeviceService,
+      //! AndroidPermissions.bindConditionProviderService,
+      //! AndroidPermissions.bindControls,
+      //! AndroidPermissions.bindDeviceAdmin,
+      //! AndroidPermissions.bindDreamService,
+      //! AndroidPermissions.bindIncallService,
+      //! AndroidPermissions.bindInputMethod,
+      //! AndroidPermissions.bindMidiDeviceService,
+      //! AndroidPermissions.bindNfcService,
+      //! AndroidPermissions.bindNotificationListenerService,
+      //! AndroidPermissions.bindPrintService,
+      //! AndroidPermissions.bindQuickAccessWalletService,
+      //! AndroidPermissions.bindQuickSettingsTile,
+      //! AndroidPermissions.bindRemoteviews,
+      //! AndroidPermissions.bindScreeningService,
+      //! AndroidPermissions.bindTelecomConnectionService,
+      //! AndroidPermissions.bindTextService,
+      //! AndroidPermissions.bindTvInput,
+      //! AndroidPermissions.bindVisualVoicemailService,
+      //! AndroidPermissions.bindVoiceInteraction,
+      //! AndroidPermissions.bindVpnService,
+      //! AndroidPermissions.bindVrListenerService,
+      //! AndroidPermissions.bindWallpaper,
+      // AndroidPermissions.bluetooth,
+      // AndroidPermissions.bluetoothAdmin,
+      //! AndroidPermissions.bluetoothPrivileged,
+      // AndroidPermissions.bodySensors,
+      //! AndroidPermissions.broadcastPackageRemoved,
+      //! AndroidPermissions.broadcastSms,
+      // AndroidPermissions.broadcastSticky,
+      //! AndroidPermissions.broadcastWapPush,
+      // AndroidPermissions.callCompanionApp,
+      // AndroidPermissions.callPhone,
+      //! AndroidPermissions.callPrivileged,
+      // AndroidPermissions.camera,
+      //! AndroidPermissions.captureAudioOutput,
+      //! AndroidPermissions.changeComponentEnabledState,
+      //! AndroidPermissions.changeConfiguration,
+      // AndroidPermissions.changeNetworkState,
+      // AndroidPermissions.changeWifiMulticastState,
+      // AndroidPermissions.changeWifiState,
+      //! AndroidPermissions.clearAppCache,
+      //! AndroidPermissions.controlLocationUpdates,
+      //! AndroidPermissions.deleteCacheFiles,
+      //! AndroidPermissions.deletePackages,
+      //! AndroidPermissions.diagnostic,
+      // AndroidPermissions.disableKeyguard,
+      //! AndroidPermissions.dump,
+      // AndroidPermissions.expandStatusBar,
+      //! AndroidPermissions.factoryTest,
+      // AndroidPermissions.foregroundService,
+      // AndroidPermissions.getAccounts,
+      //! AndroidPermissions.getAccountsPrivileged,
+      // AndroidPermissions.getPackageSize,
+      // AndroidPermissions.getTasks,
+      //! AndroidPermissions.globalSearch,
+      //! AndroidPermissions.hideOverlayWindows,
+      //! AndroidPermissions.installLocationProvider,
+      //! AndroidPermissions.installPackages,
+      //! AndroidPermissions.installShortcut,
+      //! AndroidPermissions.instantAppForegroundService,
+      //! AndroidPermissions.interactAcrossProfiles,
+      // AndroidPermissions.internet,
+      // AndroidPermissions.killBackgroundProcesses,
+      //! AndroidPermissions.loaderUsageStats,
+      //! AndroidPermissions.locationHardware,
+      //! AndroidPermissions.manageDocuments,
+      //! AndroidPermissions.manageExternalStorage,
+      //! AndroidPermissions.manageOngoingCalls,
+      // AndroidPermissions.manageOwnCalls,
+      //! AndroidPermissions.masterClear,
+      //! AndroidPermissions.mediaContentControl,
+      // AndroidPermissions.modifyAudioSettings,
+      //! AndroidPermissions.modifyPhoneState,
+      //! AndroidPermissions.mountFormatFilesystems,
+      //! AndroidPermissions.mountUnmountFilesystems,
+      // AndroidPermissions.nfc,
+      // AndroidPermissions.nfcPreferredPaymentInfo,
+      // AndroidPermissions.nfcTransactionEvent,
+      //! AndroidPermissions.packageUsageStats,
+      // AndroidPermissions.persistentActivity,
+      // AndroidPermissions.processOutgoingCalls,
+      // AndroidPermissions.queryAllPackages,
+      // AndroidPermissions.readCalendar,
+      // AndroidPermissions.readCallLog,
+      // AndroidPermissions.readContacts,
+      // AndroidPermissions.readExternalStorage,
+      //! AndroidPermissions.readInputState,
+      //! AndroidPermissions.readLogs,
+      // AndroidPermissions.readPhoneNumbers,
+      // AndroidPermissions.readPhoneState,
+      //! AndroidPermissions.readPrecisePhoneState,
+      // AndroidPermissions.readSms,
+      // AndroidPermissions.readSyncSettings,
+      // AndroidPermissions.readSyncStats,
+      //! AndroidPermissions.readVoicemail,
+      //! AndroidPermissions.reboot,
+      // AndroidPermissions.receiveBootCompleted,
+      // AndroidPermissions.receiveMms,
+      // AndroidPermissions.receiveSms,
+      // AndroidPermissions.receiveWapPush,
+      // AndroidPermissions.recordAudio,
+      // AndroidPermissions.reorderTasks,
+      //! AndroidPermissions.requestCompanionProfileWatch,
+      // AndroidPermissions.requestCompanionRunInBackground,
+      // AndroidPermissions.requestCompanionUseDataInBackground,
+      // AndroidPermissions.requestDeletePackages,
+      // AndroidPermissions.requestIgnoreBatteryOptimizations,
+      //! AndroidPermissions.requestInstallPackages,
+      //! AndroidPermissions.requestObserveCompanionDevicePresence,
+      // AndroidPermissions.requestPasswordComplexity,
+      // AndroidPermissions.restartPackages,
+      //! AndroidPermissions.sendRespondViaMessage,
+      // AndroidPermissions.sendSms,
+      //! AndroidPermissions.setAlarm,
+      //! AndroidPermissions.setAlwaysFinish,
+      //! AndroidPermissions.setAnimationScale,
+      //! AndroidPermissions.setDebugApp,
+      //! AndroidPermissions.setPreferredApplications,
+      //! AndroidPermissions.setProcessLimit,
+      //! AndroidPermissions.setTime,
+      //! AndroidPermissions.setTimeZone,
+      // AndroidPermissions.setWallpaper,
+      // AndroidPermissions.setWallpaperHints,
+      //! AndroidPermissions.signalPersistentProcesses,
+      //! AndroidPermissions.smsFinancialTransactions,
+      //! AndroidPermissions.startViewPermissionUsage,
+      //! AndroidPermissions.statusBar,
+      // AndroidPermissions.systemAlertWindow,
+      // AndroidPermissions.transmitIr,
+      //! AndroidPermissions.uninstallShortcut,
+      //! AndroidPermissions.updateDeviceStats,
+      // AndroidPermissions.useBiometric,
+      // AndroidPermissions.useFingerprint,
+      // AndroidPermissions.useFullScreenIntent,
+      //! AndroidPermissions.useIccAuthWithDeviceIdentifier,
+      // AndroidPermissions.useSip,
+      // AndroidPermissions.vibrate,
+      // AndroidPermissions.wakeLock,
+      //! AndroidPermissions.writeApnSettings,
+      // AndroidPermissions.writeCalendar,
+      // AndroidPermissions.writeCallLog,
+      // AndroidPermissions.writeContacts,
+      // AndroidPermissions.writeExternalStorage,
+      //! AndroidPermissions.writeGservices,
+      //! AndroidPermissions.writeSecureSettings,
+      //! AndroidPermissions.writeSettings,
+      // AndroidPermissions.writeSyncSettings,
+      //! AndroidPermissions.writeVoicemail,
+    };
+*/
