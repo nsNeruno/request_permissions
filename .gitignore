@@ -1,7 +1,11 @@
+# Miscellaneous
 .DS_Store
 .dart_tool/
 
+# IntelliJ related
+.idea/
+
+# Flutter/Dart/Pub related
 .packages
 .pub/
-
 build/
