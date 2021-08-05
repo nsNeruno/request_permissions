@@ -1,6 +1,6 @@
 part of request_permission;
 
-/// This class lists all permissions from android.
+/// This class contains all android permissions string constants.
 ///
 /// [Source](https://developer.android.com/reference/android/Manifest.permission)
 abstract class AndroidPermissions {

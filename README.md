@@ -1,43 +1,46 @@
 ## Introduction
 
-Use his plugin to request permissions for the android part of your [Flutter](http://www.flutter.dev).
+Use this plugin to request the declared permissions in your apps `AndroidManifest.xml`.
 
-The android permission ["android.permission.SYSTEM_ALERT_WINDOW"](https://developer.android.com/reference/android/Manifest.permission#SYSTEM_ALERT_WINDOW) always gets requested
-at last.
+The android permission ["android.permission.SYSTEM_ALERT_WINDOW"](https://developer.android.com/reference/android/Manifest.permission#SYSTEM_ALERT_WINDOW) always gets requested at last.
 
 ## Setup
 
-#### Android
+### Android
 
 Add the permissions your app needs to the **android/app/src/main/AndroidManifest.xml**.
-Put the permissions in the **manifest** tag **not** into the **application** tag.
+Put the permissions in the **manifest** tag, infront of the **application** tag.
 
-```dart
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.project">
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.CALL_PHONE"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
- <application
+ <application>
+ ...
 ```
 
-#### IOS
+### IOS
 
 Currently this plugin only supports Android, if you want to you can
 contribute to it.
 
 ## Usage
 
-After adding the permissions, you can request them in your Flutter app in the following way:
+After adding the permissions, you can request them in your Flutter app.
 
-#### Obtain an instance
+### Obtain the instance
 
 ```dart
 RequestPermission requestPermission = RequestPermission.instance;
 ```
 
-#### Request the permissions
+### Request the permissions
 
 ```dart
-RaisedButton(
+ElevatedButton(
     child: Text("request permissions"),
     onPressed: () {
         // 101 is the requestCode
@@ -53,14 +56,14 @@ RaisedButton(
 Or request just one permission:
 
 ```dart
-RaisedButton(
+ElevatedButton(
     child: Text("request camera permission"),
     onPressed: () {
         // 27 is the requestCode
         requestPermission.requestAndroidPermission("android.permission.CAMERA", 27);
     },
 ),
-RaisedButton(
+ElevatedButton(
     child: Text("request call_phone permission"),
     onPressed: () {
         // 28 is the requestCode
@@ -69,15 +72,15 @@ RaisedButton(
 ),
 ```
 
-#### Listen to the user choice
+### Listen to the users choice
 
 ```dart
 requestPermission.results.listen((event) {
-   event.grantedPermissions.forEach((key, value) {
-      if (value) {
-        print("The permission <$value> has been granted!");
+   event.grantedPermissions.forEach((permission, isGranted) {
+      if (isGranted) {
+        print("The permission \"$permission\" has been granted!");
       } else {
-        print("The permission <$value> has NOT been granted!");
+        print("The permission \"$permission\" has NOT been granted!");
       }
     });
 });

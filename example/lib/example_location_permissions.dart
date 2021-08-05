@@ -34,12 +34,10 @@ class _ExampleLocationPermissionsState
     RequestPermission.instace.results.listen((event) {
       setState(() {
         results = """requestCode: ${event.requestCode}
-grantResults: ${event.grantResults}
 """;
 
-        event.permissions.forEach((element) {
-          final permission = element.substring(element.lastIndexOf(".") + 1);
-          results += "$permission: ${event.grantedPermissions[element]}\n";
+        event.grantedPermissions.forEach((permission, isGranted) {
+          results += "$permission: $isGranted\n";
         });
       });
     });

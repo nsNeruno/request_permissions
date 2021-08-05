@@ -1,40 +1,40 @@
 part of request_permission;
 
 class ResultingPermission {
+  final Set<String> _permissions;
+  final List<int> _grantResults;
+
+  /// The requestCode used for the initial request.
   final int requestCode;
-  final Set<String> permissions;
-  final List<int> grantResults;
 
   const ResultingPermission._({
     required this.requestCode,
-    required this.permissions,
-    required this.grantResults,
-  });
+    required Set<String> permissions,
+    required List<int> grantResults,
+  })  : _permissions = permissions,
+        _grantResults = grantResults;
 
-  /// A map that contains each permission from [permissions],
-  /// and wheter it has been granted or not.
-  ///
-  /// The permission being granted corresponds to `true`.
+  /// This map contains each requested permission, and
+  /// whether it has been granted (`true`) or not (`false`).
   Map<String, bool> get grantedPermissions {
     final Map<String, bool> map = {};
 
-    for (var i = 0; i < permissions.length; i++) {
-      if (i < grantResults.length) {
-        map[permissions.elementAt(i)] =
-            RequestPermission.permissionGranted == grantResults[i];
-      } else {
+    for (var i = 0; i < _permissions.length; i++) {
+      if (i >= _grantResults.length) {
         // If there are more permissions than grantResults
-        // then assume that they are not granted
-        map[permissions.elementAt(i)] = false;
+        // then assume that the permissions have not been granted.
+        map[_permissions.elementAt(i)] = false;
+        continue;
       }
+
+      map[_permissions.elementAt(i)] =
+          RequestPermission.permissionGranted == _grantResults[i];
     }
 
     return map;
   }
 
-  /// Check wheter a certain requested [permission] has
+  /// Check wheter a certain requested permission has
   /// been granted.
-  ///
-  /// The permission beiing granted corresponds to `true`.
   bool isGranted(String permission) => grantedPermissions[permission] ?? false;
 }

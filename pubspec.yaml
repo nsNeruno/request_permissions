@@ -1,6 +1,6 @@
 name: request_permission
-description: A flutter plugin for requesting android permissions, with the right string constant.
-version: 2.1.1
+description: A plugin for requesting android permissions with string constants.
+version: 2.1.2
 homepage: https://gitlab.com/flutterplugins/request_permission
 
 environment:

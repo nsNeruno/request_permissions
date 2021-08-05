@@ -12,7 +12,7 @@ class RequestPermission {
   static const int permissionGranted = 0;
   static const int permissionDenied = -1;
 
-  /// If you decide to omit the [requestCode], when calling
+  /// If you decide to omit the requestCode, when calling
   /// [requestAndroidPermission] or [requestMultipleAndroidPermissions],
   /// then this one gets used.
   static const int defaultRequestCode = 1049;
@@ -60,21 +60,18 @@ class RequestPermission {
     });
   }
 
-  /// Wether this app is currently waiting for a response from the user
+  /// Whether this app is currently waiting for a response from the user
   /// (`true`), or not (`false`).
   bool get isWaitingForResponse => _requestedPermissions.isNotEmpty;
 
   /// After using [requestAndroidPermission] or [requestMultipleAndroidPermissions],
   /// you can listen to this `BroadcastStream`, to detect when the user
-  /// makes his choice, wether he wants to grant
+  /// makes his choice, whether he wants to grant
   /// your app the requested permisson/s or not.
   Stream<ResultingPermission> get results => _results;
 
   /// The permission [AndroidPermissions.system_alert_window] has to
   /// be handled seperately.
-  ///
-  /// Returns wether your app has already been granted the permission (`true`),
-  /// or if it has to be requested (`false`);
   Future<void> _requestPermissionSystemAlertWindow(
           [int requestCode = defaultRequestCode]) =>
       _channel.invokeMethod("requestPermissionSystemAlertWindow", {
@@ -105,10 +102,10 @@ class RequestPermission {
     );
   }
 
-  /// This function uses [requestMultipleAndroidPermissions] to request
+  /// Calls [requestMultipleAndroidPermissions] to request
   /// a single [permission].
   ///
-  /// `See` [requestMultipleAndroidPermissions] `for more info.`
+  /// `See` [requestMultipleAndroidPermissions] for more info.
   Future<void> requestAndroidPermission(
     String permission, [
     int requestCode = defaultRequestCode,
@@ -117,7 +114,7 @@ class RequestPermission {
 
   /// ## Description
   ///
-  /// * Use this function to request a list of [permissions].
+  /// * Use this function to request a [Set] of [permissions].
   ///
   ///
   /// * If your app `already has a certain permission`, then access
@@ -129,22 +126,14 @@ class RequestPermission {
   ///
   /// ## Parameters
   ///
-  /// * [permissions]: A set of strings, which are permissions,
-  ///   that you want to get granted by the user.
+  /// * [permissions]: A set of [String]s, where each [String]
+  ///   is one of the constants in [AndroidPermissions].
   ///   [See all possible permissions](https://developer.android.com/reference/android/Manifest.permission).
   ///
   ///
-  /// * [requestCode]: The requestCode for your action. The
-  ///   [requestCode], from [ResultingPermission], you get, when listening to [results],
-  ///   is the one you set here.
-  ///
-  ///
-  /// ## Returns
-  ///
-  /// * This function returns a [Map], that contains each permission you requested
-  ///   as a key and wheter your app already has the permission or not.
-  ///   If your app already has the permission, then that qualifies as `true` and
-  ///   the user will not get asked for it again.
+  /// * [requestCode]: The requestCode for your action. This is the
+  ///   requestCode you get, from [ResultingPermission], when
+  ///   listening to [results].
   Future<void> requestMultipleAndroidPermissions(
     Set<String> permissions, [
     int requestCode = defaultRequestCode,
@@ -195,7 +184,7 @@ previously requested: $_requestedPermissions
     }
   }
 
-  /// Check wether your app has a certain [permission].
+  /// Check whether your app has a certain [permission].
   Future<bool> hasAndroidPermission(String permission) async =>
       await _channel.invokeMethod<bool>(
         "hasPermission",
@@ -203,7 +192,7 @@ previously requested: $_requestedPermissions
       ) ??
       false;
 
-  /// Calls [hasAndroidPermission] on every permission in [permissions].
+  /// Calls [hasAndroidPermission] for every permission in [permissions].
   Future<Map<String, bool>> hasAndroidPermissions(
       Set<String> permissions) async {
     final results = Map<String, bool>.fromIterable(
