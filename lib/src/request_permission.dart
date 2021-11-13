@@ -1,46 +1,14 @@
-part of request_permission;
+part of '../request_permission.dart';
 
 class RequestPermission {
-  static const String _namespace =
-      "com.twelve_ampere.request_permission.RequestPermissionPlugin";
-  static const String _methodChannelId = "$_namespace.methods";
-  static const String _eventChannelId = "$_namespace.events";
-
-  static const MethodChannel _channel = MethodChannel(_methodChannelId);
-  static const EventChannel _eventChannel = EventChannel(_eventChannelId);
-
-  static const int permissionGranted = 0;
-  static const int permissionDenied = -1;
-
-  /// If you decide to omit the requestCode, when calling
-  /// [requestAndroidPermission] or [requestMultipleAndroidPermissions],
-  /// then this one gets used.
-  static const int defaultRequestCode = 1049;
-
-  static RequestPermission? _instance;
-
-  // ignore: prefer_constructors_over_static_methods
-  static RequestPermission get instace => _instance ??= RequestPermission._();
-
-  late bool _shouldRequestPermissionSystemAlertWindow;
-  late int _requestCode;
-  late Set<String> _requestedPermissions;
-
-  /// [_results] has to be saved as a variable, because if
-  /// `asBroadcastStream()` gets called multiple
-  /// times on a [Stream], then this results in only the last
-  /// added listener working.
-  ///
-  /// [Additional Info](https://stackoverflow.com/questions/16491069/why-does-this-dart-broadcast-stream-not-accept-multiple-listen-calls)
-  late Stream<ResultingPermission> _results;
-
   RequestPermission._() {
     _shouldRequestPermissionSystemAlertWindow = false;
     _requestCode = defaultRequestCode;
     _requestedPermissions = {};
+    _isWaitingForResponseNotifier = ValueNotifier(false);
 
     _results = _eventChannel.receiveBroadcastStream().map((event) {
-      final data = jsonDecode(event);
+      final data = jsonDecode(event) as Map<String, Object>;
       return ResultingPermission._(
         requestCode: data["requestCode"] as int,
         permissions: (data["permissions"] as List).map((e) => "$e").toSet(),
@@ -57,20 +25,53 @@ class RequestPermission {
       }
 
       _requestedPermissions.removeAll(event.grantedPermissions.keys);
+      _updateIsWaitingForResponseValue();
     });
   }
 
-  /// Whether this app is currently waiting for a response from the user
-  /// (`true`), or not (`false`).
-  bool get isWaitingForResponse => _requestedPermissions.isNotEmpty;
+  static const int permissionGranted = 0;
+  static const int permissionDenied = -1;
 
-  /// After using [requestAndroidPermission] or [requestMultipleAndroidPermissions],
-  /// you can listen to this `BroadcastStream`, to detect when the user
-  /// makes his choice, whether he wants to grant
-  /// your app the requested permisson/s or not.
+  /// If you decide to omit the requestCode, when calling
+  /// [requestAndroidPermission] or [requestMultipleAndroidPermissions],
+  /// then this one gets used.
+  static const int defaultRequestCode = 1049;
+
+  static RequestPermission? _instance;
+
+  // ignore: prefer_constructors_over_static_methods
+  static RequestPermission get instace => _instance ??= RequestPermission._();
+
+  /// [_results] has to be saved as a variable, because if
+  /// `asBroadcastStream()` gets called multiple
+  /// times on a [Stream], then this results in only the last
+  /// added listener working.
+  ///
+  /// [Additional Info](https://stackoverflow.com/questions/16491069/why-does-this-dart-broadcast-stream-not-accept-multiple-listen-calls)
+  late final Stream<ResultingPermission> _results;
+
+  late bool _shouldRequestPermissionSystemAlertWindow;
+  late int _requestCode;
+  late Set<String> _requestedPermissions;
+
+  late final ValueNotifier<bool> _isWaitingForResponseNotifier;
+
+  /// Whether this app is currently waiting for a response
+  /// from the user (`true`), or not (`false`).
+  ValueListenable<bool> get isWaitingForResponse =>
+      _isWaitingForResponseNotifier;
+
+  /// After using [requestAndroidPermission] or
+  /// [requestMultipleAndroidPermissions], you can listen to this
+  /// `BroadcastStream`, to detect when the user makes his choice, whether
+  /// he wants to grant your app the requested permisson/s or not.
   Stream<ResultingPermission> get results => _results;
 
-  /// The permission [AndroidPermissions.system_alert_window] has to
+  void _updateIsWaitingForResponseValue() {
+    _isWaitingForResponseNotifier.value = _requestedPermissions.isNotEmpty;
+  }
+
+  /// The permission [AndroidPermissions.systemAlertWindow] has to
   /// be handled seperately.
   Future<void> _requestPermissionSystemAlertWindow(
           [int requestCode = defaultRequestCode]) =>
@@ -116,10 +117,12 @@ class RequestPermission {
   ///
   /// * Use this function to request a [Set] of [permissions].
   ///
+  /// ---
   ///
   /// * If your app `already has a certain permission`, then access
   ///   for it will not be asked again.
   ///
+  /// ---
   ///
   /// * [Native implementation](https://developer.android.com/reference/androidx/core/app/ActivityCompat#requestPermissions(android.app.Activity,%20java.lang.String[],%20int)).
   ///
@@ -134,23 +137,24 @@ class RequestPermission {
   /// * [requestCode]: The requestCode for your action. This is the
   ///   requestCode you get, from [ResultingPermission], when
   ///   listening to [results].
+  ///
+  ///
+  /// ## Return
+  ///
+  /// * Completes with a [Future.error], if [requestMultipleAndroidPermissions]
+  ///   was called while [isWaitingForResponse] is `true`.
   Future<void> requestMultipleAndroidPermissions(
     Set<String> permissions, [
     int requestCode = defaultRequestCode,
   ]) async {
-    if (isWaitingForResponse) {
-      print("""
-*********************************************************
-RequestPermission: Cannot request another permission, while
-still waiting for a response from the user for the previously
-requested permissions.
+    if (isWaitingForResponse.value) return Future.error("""
+Cannot request another permission, while still waiting for a
+response from the user for the previously requested permissions.
 
-previously requested: $_requestedPermissions
+previously requested:
 
-*********************************************************
-    """);
-      return;
-    }
+$_requestedPermissions
+""");
 
     List<String> ungrantedPermissions = [];
 
@@ -159,6 +163,7 @@ previously requested: $_requestedPermissions
     }
 
     _requestedPermissions = ungrantedPermissions.toSet();
+    _updateIsWaitingForResponseValue();
 
     // Remove duplicates
     ungrantedPermissions = _requestedPermissions.toList();
@@ -209,22 +214,26 @@ previously requested: $_requestedPermissions
 
   /// ## Description
   ///
-  /// * Gets whether you should show UI with rationale for requesting a permission.
-  ///   You should do this only if you do not have the permission and the context in
-  ///   which the permission is requested does not clearly communicate to the user
-  ///   what would be the benefit from granting this permission.
+  /// * Gets whether you should show UI with rationale for requesting a
+  ///   permission. You should do this only if you do not have the permission
+  ///   and the context in which the permission is requested does not clearly
+  ///   communicate to the user what would be the benefit from granting this
+  ///   permission.
   ///
+  /// ---
   ///
   /// * For example, if you write a camera app, requesting the camera permission
-  ///   would be expected by the user and no rationale for why it is requested is
-  ///   needed. If however, the app needs location for tagging photos then a non-tech
-  ///   savvy user may wonder how location is related to taking photos. In this case
-  ///   you may choose to show UI with rationale of requesting this permission.
+  ///   would be expected by the user and no rationale for why it is requested
+  ///   is needed. If however, the app needs location for tagging photos then a
+  ///   non-tech savvy user may wonder how location is related to taking photos.
+  ///   In this case you may choose to show UI with rationale of requesting this
+  ///   permission.
   ///
   ///
   /// ## Parameters
   ///
-  /// * [permission] - A permission your app wants to request.
+  /// * **[permission]**:
+  ///   A permission your app wants to request.
   ///
   ///
   /// ## Return
@@ -232,7 +241,9 @@ previously requested: $_requestedPermissions
   /// * Whether you can show permission rationale UI.
   ///
   ///
-  /// [See](https://developer.android.com/reference/androidx/core/app/ActivityCompat#shouldShowRequestPermissionRationale(android.app.Activity,%20java.lang.String))
+  /// ## References
+  ///
+  /// [ActivityCompat#shouldShowRequestPermissionRationale](https://developer.android.com/reference/androidx/core/app/ActivityCompat#shouldShowRequestPermissionRationale(android.app.Activity,%20java.lang.String))
   Future<bool> shouldShowRequestPermissionRationale(String permission) async =>
       await _channel.invokeMethod<bool>(
         "shouldShowRequestPermissionRationale",

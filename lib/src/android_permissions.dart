@@ -1,4 +1,6 @@
-part of request_permission;
+// ignore_for_file: lines_longer_than_80_chars
+
+part of '../request_permission.dart';
 
 /// This class contains all android permissions string constants.
 ///
@@ -10,6 +12,10 @@ abstract class AndroidPermissions {
   /// [See](https://developer.android.com/reference/android/Manifest.permission#ACCESS_BACKGROUND_LOCATION)
   static const String accessBackgroundLocation =
       "android.permission.ACCESS_BACKGROUND_LOCATION";
+
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#ACCESS_BLOBS_ACROSS_USERS)
+  static const String accessBlobsAcrossUsers =
+      "android.permission.ACCESS_BLOBS_ACROSS_USERS";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#ACCESS_CHECKIN_PROPERTIES)
   static const String accessCheckinProperties =
@@ -75,8 +81,6 @@ abstract class AndroidPermissions {
       "android.permission.BIND_CALL_REDIRECTION_SERVICE";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#BIND_CARRIER_MESSAGING_CLIENT_SERVICE)
-  @Deprecated(
-      "\n\nThis constant was deprecated in API level 23. Use bindCarrierServices instead")
   static const String bindCarrierMessagingClientService =
       "android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE";
 
@@ -89,8 +93,6 @@ abstract class AndroidPermissions {
       "android.permission.BIND_CARRIER_SERVICES";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#BIND_CHOOSER_TARGET_SERVICE)
-  @Deprecated(
-      "\n\nThis constant was deprecated in API level 30. For publishing direct share targets, please follow the instructions in https://developer.android.com/training/sharing/receive.html#providing-direct-share-targets instead")
   static const String bindChooserTargetService =
       "android.permission.BIND_CHOOSER_TARGET_SERVICE";
 
@@ -183,9 +185,19 @@ abstract class AndroidPermissions {
   /// [See](https://developer.android.com/reference/android/Manifest.permission#BLUETOOTH_ADMIN)
   static const String bluetoothAdmin = "android.permission.BLUETOOTH_ADMIN";
 
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#BLUETOOTH_ADVERTISE)
+  static const String bluetoothAdvertise =
+      "android.permission.BLUETOOTH_ADVERTISE";
+
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#BLUETOOTH_CONNECT)
+  static const String bluetoothConnect = "android.permission.BLUETOOTH_CONNECT";
+
   /// [See](https://developer.android.com/reference/android/Manifest.permission#BLUETOOTH_PRIVILEGED)
   static const String bluetoothPrivileged =
       "android.permission.BLUETOOTH_PRIVILEGED";
+
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#BLUETOOTH_SCAN)
+  static const String bluetoothScan = "android.permission.BLUETOOTH_SCAN";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#BODY_SENSORS)
   static const String bodySensors = "android.permission.BODY_SENSORS";
@@ -293,6 +305,10 @@ abstract class AndroidPermissions {
   static const String hideOverlayWindows =
       "android.permission.HIDE_OVERLAY_WINDOWS";
 
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#HIGH_SAMPLING_RATE_SENSORS)
+  static const String highSamplingRateSensors =
+      "android.permission.HIGH_SAMPLING_RATE_SENSORS";
+
   /// [See](https://developer.android.com/reference/android/Manifest.permission#INSTALL_LOCATION_PROVIDER)
   static const String installLocationProvider =
       "android.permission.INSTALL_LOCATION_PROVIDER";
@@ -318,6 +334,10 @@ abstract class AndroidPermissions {
   static const String killBackgroundProcesses =
       "android.permission.KILL_BACKGROUND_PROCESSES";
 
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK)
+  static const String launchTwoPaneSettingsDeepLink =
+      "android.permission.LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK";
+
   /// [See](https://developer.android.com/reference/android/Manifest.permission#LOADER_USAGE_STATS)
   static const String loaderUsageStats =
       "android.permission.LOADER_USAGE_STATS";
@@ -331,6 +351,9 @@ abstract class AndroidPermissions {
   /// [See](https://developer.android.com/reference/android/Manifest.permission#MANAGE_EXTERNAL_STORAGE)
   static const String manageExternalStorage =
       "android.permission.MANAGE_EXTERNAL_STORAGE";
+
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#MANAGE_MEDIA)
+  static const String manageMedia = "android.permission.MANAGE_MEDIA";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#MANAGE_ONGOING_CALLS)
   static const String manageOngoingCalls =
@@ -462,6 +485,10 @@ abstract class AndroidPermissions {
   static const String requestCompanionRunInBackground =
       "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
 
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND)
+  static const String requestCompanionStartForegroundServicesFromBackground =
+      "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND";
+
   /// [See](https://developer.android.com/reference/android/Manifest.permission#REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)
   static const String requestCompanionUseDataInBackground =
       "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND";
@@ -488,6 +515,10 @@ abstract class AndroidPermissions {
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#RESTART_PACKAGES)
   static const String restartPackages = "android.permission.RESTART_PACKAGES";
+
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#SCHEDULE_EXACT_ALARM)
+  static const String scheduleExactAlarm =
+      "android.permission.SCHEDULE_EXACT_ALARM";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#SEND_RESPOND_VIA_MESSAGE)
   static const String sendRespondViaMessage =
@@ -537,6 +568,10 @@ abstract class AndroidPermissions {
   static const String smsFinancialTransactions =
       "android.permission.SMS_FINANCIAL_TRANSACTIONS";
 
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#START_FOREGROUND_SERVICES_FROM_BACKGROUND)
+  static const String startForegroundServicesFromBackground =
+      "android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND";
+
   /// [See](https://developer.android.com/reference/android/Manifest.permission#START_VIEW_PERMISSION_USAGE)
   static const String startViewPermissionUsage =
       "android.permission.START_VIEW_PERMISSION_USAGE";
@@ -559,6 +594,10 @@ abstract class AndroidPermissions {
   static const String updateDeviceStats =
       "android.permission.UPDATE_DEVICE_STATS";
 
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION)
+  static const String updatePackagesWithoutUserAction =
+      "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION";
+
   /// [See](https://developer.android.com/reference/android/Manifest.permission#USE_BIOMETRIC)
   static const String useBiometric = "android.permission.USE_BIOMETRIC";
 
@@ -575,6 +614,9 @@ abstract class AndroidPermissions {
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#USE_SIP)
   static const String useSip = "android.permission.USE_SIP";
+
+  /// [See](https://developer.android.com/reference/android/Manifest.permission#UWB_RANGING)
+  static const String uwbRanging = "android.permission.UWB_RANGING";
 
   /// [See](https://developer.android.com/reference/android/Manifest.permission#VIBRATE)
   static const String vibrate = "android.permission.VIBRATE";

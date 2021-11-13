@@ -1,14 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:request_permission/request_permission.dart';
 
 import 'builders.dart';
 
-/// This Example showcases how to request the following permissions.
+/// This example showcases how to request the following permissions.
 ///
 /// [AndroidPermissions.accessFineLocation]
 /// [AndroidPermissions.accessCoarseLocation]
 /// [AndroidPermissions.accessBackgroundLocation]
 class ExampleLocationPermissions extends StatefulWidget {
+  const ExampleLocationPermissions({Key? key}) : super(key: key);
+
   @override
   _ExampleLocationPermissionsState createState() =>
       _ExampleLocationPermissionsState();
@@ -24,8 +27,9 @@ class _ExampleLocationPermissionsState
     super.initState();
     results = "Empty";
 
-    /// Before aquiring the permission [AndroidPermissions.accessBackgroundLocation],
-    /// we have to get the users consent for the following [prerequisites].
+    /// Before aquiring the permission
+    /// [AndroidPermissions.accessBackgroundLocation], we have to get the
+    /// users consent for the following [prerequisites].
     prerequisites = {
       AndroidPermissions.accessFineLocation,
       AndroidPermissions.accessCoarseLocation
@@ -33,7 +37,8 @@ class _ExampleLocationPermissionsState
 
     RequestPermission.instace.results.listen((event) {
       setState(() {
-        results = """requestCode: ${event.requestCode}
+        results = """
+requestCode: ${event.requestCode}
 """;
 
         event.grantedPermissions.forEach((permission, isGranted) {
@@ -79,5 +84,13 @@ class _ExampleLocationPermissionsState
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('results', results))
+      ..add(IterableProperty<String>('prerequisites', prerequisites));
   }
 }

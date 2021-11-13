@@ -1,18 +1,19 @@
-part of request_permission;
+part of '../request_permission.dart';
 
+@immutable
 class ResultingPermission {
-  final Set<String> _permissions;
-  final List<int> _grantResults;
-
-  /// The requestCode used for the initial request.
-  final int requestCode;
-
   const ResultingPermission._({
     required this.requestCode,
     required Set<String> permissions,
     required List<int> grantResults,
   })  : _permissions = permissions,
         _grantResults = grantResults;
+
+  final Set<String> _permissions;
+  final List<int> _grantResults;
+
+  /// The requestCode used for the initial request.
+  final int requestCode;
 
   /// This map contains each requested permission, and
   /// whether it has been granted (`true`) or not (`false`).
