@@ -1,19 +1,9 @@
-<head>
-<style>
-class {
-  color: #00d8b2;
-}
+## 2.1.4
 
-method {
-  color: #c26b00;
-  font-style: italic;
-}
-
-keyword {
-  color: #ad0097;
-}
-</style>
-</head>
+  * Fixed the following error from version `2.1.3`, when trying to request a permission.
+    ```
+    E/flutter (30649): [ERROR:flutter/lib/ui/ui_dart_state.cc(209)] Unhandled Exception: type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+    ```
 
 ## 2.1.3
 
@@ -25,15 +15,15 @@ keyword {
 
   * **[request_permission.dart](lib/src/request_permission.dart)**:
     
-    * <class>RequestPermission</class>
+    * RequestPermission
       
-      * Changed type of `isWaitingForResponse` to <class>ValueListenable</class>\<<class>bool</class>\>.
+      * Changed type of `isWaitingForResponse` to ValueListenable\<bool\>.
 
 ---
   
   * **[resulting_permission.dart](lib/src/resulting_permission.dart)**:
     
-    * Marked <class>ResultingPermission</class> as `@immutable`.
+    * Marked ResultingPermission as `@immutable`.
 
 ---
 

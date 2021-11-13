@@ -22,6 +22,11 @@ class _ExampleLocationPermissionsState
   late String results;
   late Set<String> prerequisites;
 
+  void waitingForResponseListener() {
+    print("\n\nisWaitingForResponse: "
+        "${RequestPermission.instace.isWaitingForResponse.value}\n\n");
+  }
+
   @override
   void initState() {
     super.initState();
@@ -35,17 +40,19 @@ class _ExampleLocationPermissionsState
       AndroidPermissions.accessCoarseLocation
     };
 
-    RequestPermission.instace.results.listen((event) {
-      setState(() {
-        results = """
+    RequestPermission.instace
+      ..isWaitingForResponse.addListener(waitingForResponseListener)
+      ..results.listen((event) {
+        setState(() {
+          results = """
 requestCode: ${event.requestCode}
 """;
 
-        event.grantedPermissions.forEach((permission, isGranted) {
-          results += "$permission: $isGranted\n";
+          event.grantedPermissions.forEach((permission, isGranted) {
+            results += "$permission: $isGranted\n";
+          });
         });
       });
-    });
   }
 
   @override

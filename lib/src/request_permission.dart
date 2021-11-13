@@ -8,7 +8,7 @@ class RequestPermission {
     _isWaitingForResponseNotifier = ValueNotifier(false);
 
     _results = _eventChannel.receiveBroadcastStream().map((event) {
-      final data = jsonDecode(event) as Map<String, Object>;
+      final data = jsonDecode(event) as Map<String, dynamic>;
       return ResultingPermission._(
         requestCode: data["requestCode"] as int,
         permissions: (data["permissions"] as List).map((e) => "$e").toSet(),
