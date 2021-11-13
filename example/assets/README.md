@@ -1,1 +1,0 @@
-Automatically generated assets folder
