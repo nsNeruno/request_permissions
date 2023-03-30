@@ -91,7 +91,11 @@ public class RequestPermissionPlugin implements
                 // Activity.RESULT_CANCELED = 0
 
                 String permission = "";
-                switch (data.getAction()) {
+                String action = "";
+                if (data != null) {
+                    action = data.getAction();
+                }
+                switch (action) {
                     case Settings
                             .ACTION_MANAGE_OVERLAY_PERMISSION:
                         permission = Manifest.permission.SYSTEM_ALERT_WINDOW;
