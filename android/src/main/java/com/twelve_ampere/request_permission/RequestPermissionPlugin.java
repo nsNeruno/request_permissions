@@ -93,7 +93,10 @@ public class RequestPermissionPlugin implements
                 String permission = "";
                 String action = "";
                 if (data != null) {
-                    action = data.getAction() ?? "";
+                    String mAction = data.getAction();
+                    if (mAction != null) {
+                        action = mAction;
+                    }
                 }
                 switch (action) {
                     case Settings
